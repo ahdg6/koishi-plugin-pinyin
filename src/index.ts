@@ -5,7 +5,6 @@ import fs from 'fs';
 import { handleFile, DownloadError } from './downloader';
 
 export const name = 'pinyin';
-const logger = new Logger(name);
 
 declare module 'koishi' {
   interface Context {
@@ -48,7 +47,7 @@ export class Pinyin extends Service {
     ctx: Context,
     public config: Pinyin.Config,
   ) {
-    super(ctx, 'pinyin');
+    super(ctx, 'pinyin', true);
 
     ctx
       .command('pinyin <message:string>')
@@ -86,6 +85,11 @@ export class Pinyin extends Service {
       });
   }
 
+  // @ts-ignore
+  get logger(): Logger {
+    return this.ctx.logger(name)
+  }
+
   async start() {
     let { nodeBinaryPath } = this.config;
     const nodeDir = path.resolve(this.ctx.baseDir, nodeBinaryPath);
@@ -95,10 +99,10 @@ export class Pinyin extends Service {
       nativeBinding = await this.getNativeBinding(nodeDir);
     } catch (e) {
       if (e instanceof UnsupportedError) {
-        logger.error('Pinyin 目前不支持你的系统');
+        this.logger.error('Pinyin 目前不支持你的系统');
       }
       if (e instanceof DownloadError) {
-        logger.error('下载二进制文件遇到错误，请查看日志获取更详细信息');
+        this.logger.error('下载二进制文件遇到错误，请查看日志获取更详细信息');
       }
       throw e;
     }
@@ -107,7 +111,7 @@ export class Pinyin extends Service {
       asyncPinyin: this.asyncPinyin,
       compare: this.compare,
     } = nativeBinding);
-    logger.success('Pinyin 服务启动成功');
+    this.logger.success('Pinyin 服务启动成功');
   }
 
   private async getNativeBinding(nodeDir) {
@@ -156,10 +160,10 @@ export class Pinyin extends Service {
     const localFileExisted = fs.existsSync(nodePath);
     try {
       if (!localFileExisted)
-        await handleFile(nodeDir, nodeName, logger, this.ctx.http);
+        await handleFile(nodeDir, nodeName, this.logger, this.ctx.http);
       nativeBinding = require(nodePath);
     } catch (e) {
-      logger.error('在处理二进制文件时遇到了错误', e);
+      this.logger.error('在处理二进制文件时遇到了错误', e);
       if (e instanceof DownloadError) {
         throw e;
       }
@@ -204,7 +208,6 @@ export namespace Pinyin {
   });
 }
 
-Context.service('pinyin', Pinyin);
 export default Pinyin;
 class UnsupportedError extends Error {
   constructor(message: string) {

@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-pinyin",
   "description": "为 Koishi 提供拼音服务",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -22,13 +22,13 @@
     "plugin"
   ],
   "peerDependencies": {
-    "koishi": "^4.13.6"
+    "koishi": "^4.17.0"
   },
   "dependencies": {
     "nodejs-file-downloader": "^4.12.1",
-    "tar": "^6.1.15"
+    "tar": "^6.2.0"
   },
   "devDependencies": {
-    "prettier": "^3.0.0"
+    "prettier": "^3.2.5"
   }
 }
